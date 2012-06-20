@@ -1,0 +1,11 @@
+Fitnesse
+all
+build
+clean
+compile
+createUpdateLists
+jar
+retrieve
+standalone-jar
+unit_test
+unit_tests

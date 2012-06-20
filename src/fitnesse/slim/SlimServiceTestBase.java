@@ -185,4 +185,10 @@ public abstract class SlimServiceTestBase {
     assertNull(results.get("id2"));
   }
 
+  @Test
+  public void canSpecifyAnInteractionClass() {
+    SlimService.parseCommandLine(new String[]{"-i", "fitnesse.slim.fixtureInteraction.DefaultInteraction"});
+    assertEquals("fitnesse.slim.fixtureInteraction.DefaultInteraction", SlimService.getInteractionClass().getName());
+  }
+
 }
