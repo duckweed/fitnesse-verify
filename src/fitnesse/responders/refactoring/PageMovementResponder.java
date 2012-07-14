@@ -93,22 +93,68 @@ public abstract class PageMovementResponder implements SecureResponder {
     return PathParser.render(crawler.getFullPath(newParent).addNameToEnd(newName));
   }
 
-  protected void movePage(WikiPage movedPage, WikiPage targetPage) {
-    PageData pageData = movedPage.getData();
+  protected void movePage(WikiPage movedPage, WikiPage newParentPage, String pageName) {
+	  
+  	if (isSymlinkedPage(movedPage)) {
+  		WikiPage referencedPage = ((SymbolicPage) movedPage).getRealPage();
+  		removeSymlink(movedPage);
+  		createSymlink(referencedPage, newParentPage, pageName);
+  	} else {
+  		PageData pageData = movedPage.getData();
+  		WikiPage targetPage = newParentPage.addChildPage(pageName);
+  		
+	    targetPage.commit(pageData);
+  	
+	    moveChildren(movedPage, targetPage);
 
-    targetPage.commit(pageData);
-
-    moveChildren(movedPage, targetPage);
-
-    WikiPage parentOfMovedPage = movedPage.getParent();
-    parentOfMovedPage.removeChildPage(movedPage.getName());
+	    WikiPage parentOfMovedPage = movedPage.getParent();
+	    parentOfMovedPage.removeChildPage(movedPage.getName());
+  	}
   }
 
   protected void moveChildren(WikiPage movedPage, WikiPage newParentPage) {
     List<WikiPage> children = movedPage.getChildren();
     for (WikiPage page : children) {
-      movePage(page, newParentPage.addChildPage(page.getName()));
+      movePage(page, newParentPage, page.getName());
     }
+  }
+
+  private boolean isSymlinkedPage(WikiPage page) {
+	  return page instanceof SymbolicPage;
+  }
+
+  private void removeSymlink(WikiPage movedPage) {
+    WikiPage parent = movedPage.getParent();
+    PageData data = parent.getData();
+    WikiPageProperty symLinks = data.getProperties().getProperty(SymbolicPage.PROPERTY_NAME);
+    symLinks.remove(movedPage.getName());
+    parent.commit(data);
+  }
+
+  private void createSymlink(WikiPage referencedPage, WikiPage newParentPage,
+    String pageName) {
+    PageData newParentData = newParentPage.getData();
+    WikiPageProperty symLinks = newParentData.getProperties().getProperty(SymbolicPage.PROPERTY_NAME);
+    WikiPagePath fullPath;
+    if (isChildOf(referencedPage, oldRefactoredPage)) {
+      // Watch out: the referenced page will also be moved
+      WikiPagePath relativePath = PathParser.parse(oldRefactoredPage.getPageCrawler().getRelativeName(oldRefactoredPage.getParent(), referencedPage));
+      fullPath = newParentPage.getPageCrawler().getFullPathOfChild(this.newParentPage, relativePath);
+    } else {
+      fullPath = referencedPage.getPageCrawler().getFullPath(referencedPage);
+    }
+    fullPath.makeAbsolute();
+    symLinks.set(pageName, PathParser.render(fullPath));
+    newParentPage.commit(newParentData);
+  }
+
+
+
+  private boolean isChildOf(WikiPage childPage, WikiPage parentPage) {
+	  PageCrawler crawler = parentPage.getPageCrawler();
+	  String childPath = PathParser.render(crawler.getFullPath(childPage));
+	  String parentPath = PathParser.render(crawler.getFullPath(parentPage));
+	  return childPath.startsWith(parentPath);
   }
 
   public SecureOperation getSecureOperation() {
