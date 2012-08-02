@@ -28,7 +28,7 @@ public class DefaultInteractionTest {
     interaction.methodInvoke(setI, o, expectedInt);
     Integer gotI = (Integer) interaction.methodInvoke(getI, o);
 
-    assertEquals("should be able create, set and get methods on a class", expectedInt, gotI);
+    assertEquals("should be able create an object, and use methods on a class", expectedInt, gotI);
   }
 
   @Test
