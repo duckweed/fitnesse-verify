@@ -1605,7 +1605,7 @@ Wysiwyg.prototype.selectionChanged = function () {
     // -1. header
     wikiRules.push("^[ \\t\\r\\f\\v]*![1-6][ \\t\\r\\f\\v]+.*?(?:#" + _xmlName + ")?[ \\t\\r\\f\\v]*$");
     // -2. list
-    wikiRules.push("^[ \\t\\r\\f\\v]+\\*[ \\t\\r\\f\\v]");
+    wikiRules.push("^[ \\t\\r\\f\\v]*[*-][ \\t\\r\\f\\v]");
     // -3. definition and comment
     wikiRules.push("^(?:![a-z]|#).*$");
     // -5. leading space
@@ -1828,7 +1828,9 @@ Wysiwyg.prototype.wikitextToFragment = function (wikitext, contentDocument, opti
         if (inCollapsibleBlock) {
             inCollapsibleBlock--;
             closeToFragment("div");
-            holder = holder.parentNode;
+            if (holder !== fragment) {
+                holder = holder.parentNode;
+            }
             // Ensure the user can always edit below the block
             openParagraph();
         }
@@ -1986,7 +1988,7 @@ Wysiwyg.prototype.wikitextToFragment = function (wikitext, contentDocument, opti
     }
 
     function handleList(value) {
-        var match = /^(\s+)\*\s/.exec(value);
+        var match = /^(\s*)[*-]\s/.exec(value);
         var className, depth, start;
         if (!match) {
             holder.appendChild(contentDocument.createTextNode(value));
@@ -2150,12 +2152,12 @@ Wysiwyg.prototype.wikitextToFragment = function (wikitext, contentDocument, opti
 
         while (element !== _fragment) {
             var tag = element.tagName.toLowerCase();
-            if (tag === stopTag) {
-                holder = element;
-                return;
-            }
             var method = null;
             switch (tag) {
+            case stopTag:
+            case "div":
+                holder = element;
+                return;
             case "p":
                 method = closeParagraph;
                 break;
