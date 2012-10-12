@@ -3,9 +3,12 @@
 package fitnesse.slimTables;
 
 import fitnesse.responders.run.slimResponder.SlimTestContext;
+import fitnesse.slim.fixtureInteraction.MockingInteraction;
 import util.ListUtility;
 
 import java.util.*;
+
+import static fitnesse.slim.fixtureInteraction.MockingInteraction.MOCKING_FLAG;
 
 public class QueryTable extends SlimTable {
   protected List<String> fieldNames = new ArrayList<String>();
@@ -22,7 +25,7 @@ public class QueryTable extends SlimTable {
   }
 
   public boolean matches(String actual, String expected) {
-    if("----mockingOnly----".equals(expected)){
+    if(MOCKING_FLAG.equals(expected)){
       return true;
     }
     if (actual == null || expected == null)

@@ -5,6 +5,7 @@ package fitnesse.slimTables;
 import fitnesse.responders.run.TestSummary;
 import fitnesse.responders.run.slimResponder.SlimTestContext;
 import fitnesse.responders.run.slimResponder.SlimTestSystem;
+import fitnesse.slim.fixtureInteraction.MockingInteraction;
 import fitnesse.wikitext.Utils;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static fitnesse.slim.fixtureInteraction.MockingInteraction.MOCKING_FLAG;
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 import static util.ListUtility.list;
@@ -647,8 +649,8 @@ public abstract class SlimTable {
 
       if (actual == null)
         evaluationMessage = fail("null"); //todo can't be right message.
-      else if (actual.equals("----mockingOnly----"))
-        evaluationMessage = pass("----mockingOnly----");
+      else if (actual.equals(MOCKING_FLAG))
+        evaluationMessage = pass(actual);
       else if (actual.equals(replacedExpected))
         evaluationMessage = pass(announceBlank(replaceSymbolsWithFullExpansion(expected)));
       else if (replacedExpected.length() == 0)

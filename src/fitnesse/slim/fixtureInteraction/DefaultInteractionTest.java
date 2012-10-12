@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import static fitnesse.slim.fixtureInteraction.MockingInteraction.*;
 import static junit.framework.Assert.assertEquals;
 
 public class DefaultInteractionTest {
@@ -39,7 +40,6 @@ public class DefaultInteractionTest {
     interaction.methodInvoke(setI, testee, new Integer(3));
     String gotI = (String) interaction.methodInvoke(getI, testee);
 
-    String expectedMockingOnlyString = "----mockingOnly----";
-    assertEquals("should be able create, and call setters and getters. These won't work", expectedMockingOnlyString, gotI);
+    assertEquals("should be able create, and call setters and getters. These won't work", MOCKING_FLAG, gotI);
   }
 }
