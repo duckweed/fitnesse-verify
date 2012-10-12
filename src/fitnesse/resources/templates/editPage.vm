@@ -28,12 +28,29 @@
   <label for="helptext">Help text:</label><input type="text" id="helptext" name="helpText" value="$!helpText" />
  </fieldset>
 
+  
+   
+  
+
  <fieldset id="editor">
   <span id="edit_buttons">
    <script src="/files/fitnesse/javascript/SpreadsheetTranslator.js" type="text/javascript"></script>
    <script src="/files/fitnesse/javascript/spreadsheetSupport.js" type="text/javascript"></script>
    <script src="/files/fitnesse/javascript/WikiFormatter.js" type="text/javascript"></script>
    <script src="/files/fitnesse/javascript/wikiFormatterSupport.js" type="text/javascript"></script>
+   
+   <select id="templateMap">
+    <option value=""></option>
+    #foreach ($templateEntry in $templateMap.entrySet())
+    <option value="$templateEntry.key">$templateEntry.value</option>
+    #end
+   </select>
+   
+   <script src="/files/fitnesse/javascript/textinputs_jquery.js" type="text/javascript"></script>
+  <script src="/files/fitnesse/javascript/TemplateInserter.js" type="text/javascript"></script>
+  <script src="/files/fitnesse/javascript/TemplateInserterSupport.js" type="text/javascript"></script>
+   
+  
   </span>
  
   <textarea class="wikitext no_wrap" id="pageContent" name="pageContent" wrap="off">$pageContent</textarea>
@@ -73,9 +90,40 @@ $(function () {
   };
 
   var editors = Wysiwyg.initialize();
-  toggle_edit_buttons(editors[0].activeEditor());
-  $('#editor-wysiwyg-1,#editor-textarea-1').click(function() {
-    toggle_edit_buttons($(this).val());
-  });
+  if (editors) {
+    var editor = editors[0];
+    toggle_edit_buttons(editor.activeEditor());
+    $('#editor-wysiwyg-1,#editor-textarea-1').click(function() {
+      toggle_edit_buttons($(this).val());
+    });
+  
+    // On cancel button:
+    
+    function fieldValues () {
+      return $.map($('#pageContent,#helptext,#suites', document.f), function(e) { return $(e).val(); });
+    }
+    
+    var originalFieldValues = fieldValues();
+    
+    var performingSubmit = false;
+    
+    $(document.f).submit(function () {
+      performingSubmit = true;
+    });
+
+    window.onbeforeunload = function () {
+      if (performingSubmit) {
+        return;
+      }
+
+      if (editor.activeEditor() === "wysiwyg") {
+        editor.loadWikiText();
+      }
+
+      if (fieldValues().join('$$') !== originalFieldValues.join('$$')) {
+        return "The page content has been changed.\nDo you really want to leave this page?";
+      }
+    };
+  }
 });
 </script>
