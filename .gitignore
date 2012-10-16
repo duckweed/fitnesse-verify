@@ -11,6 +11,7 @@ jsunit/*
 agitar/*
 dist/*
 classes/*
+out/*
 antlib/*
 javadoc/*
 lib/*
